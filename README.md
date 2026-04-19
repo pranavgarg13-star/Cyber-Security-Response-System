@@ -15,15 +15,15 @@ A DBMS project built with MySQL, Flask, and Python.
 ## Setup instructions
 
 ### 1. Clone the repo
-git clone https://github.com/YOUR_USERNAME/cyber-irs.git
-cd cyber-irs
+git clone https://github.com/YOUR_USERNAME/cyber-res.git
+cd cyber-res
 
 ### 2. Install dependencies
 pip install -r requirements.txt
 
 ### 3. Set up the database
 - Open MySQL Workbench
-- Run cyber_irs.sql to create and populate the database
+- Run cyber_res.sql to create and populate the database
 
 ### 4. Configure database connection
 cp db_example.py db.py
