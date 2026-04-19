@@ -31,4 +31,4 @@ cp db_example.py db.py
 
 ### 5. Run the app
 python app.py
-# Visit http://127.0.0.1:5000
+Visit http://127.0.0.1:5000
