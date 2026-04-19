@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+{% block title %}New Incident{% endblock %}
+
+{% block content %}
+
+<div style="max-width: 640px;">
+
+  <a href="{{ url_for('incidents') }}" style="font-size:13px; color:#888;">
+    ← Back to incidents
+  </a>
+  <h1 style="margin: 10px 0 4px;">Log new incident</h1>
+  <p style="color:#888; font-size:14px; margin-bottom:28px;">
+    Fill in the details below. A HIGH or CRITICAL incident will auto-generate an alert.
+  </p>
+
+  <form method="POST" action="{{ url_for('new_incident') }}">
+
+    <!-- Incident details -->
+    <div class="card" style="margin-bottom:16px;">
+      <h2 style="margin-bottom:16px;">Incident details</h2>
+
+      <div class="field">
+        <label for="title">Title <span class="required">*</span></label>
+        <input type="text" id="title" name="title"
+               placeholder="e.g. Ransomware detected on server-01"
+               required>
+      </div>
+
+      <div class="field">
+        <label for="description">Description</label>
+        <textarea id="description" name="description" rows="3"
+                  placeholder="What happened? What systems are affected?"></textarea>
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label for="severity">Severity <span class="required">*</span></label>
+          <select id="severity" name="severity" required>
+            <option value="">— select —</option>
+            <option value="LOW">Low</option>
+            <option value="MEDIUM">Medium</option>
+            <option value="HIGH">High</option>
+            <option value="CRITICAL">Critical</option>
+            
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="status">Status <span class="required">*</span></label>
+          <select id="status" name="status" required>
+            <option value="OPEN">Open</option>
+            <option value="IN_PROGRESS">In progress</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Initial event (optional) -->
+    <div class="card" style="margin-bottom:16px;">
+      <h2 style="margin-bottom:4px;">Initial event <span style="font-weight:400; font-size:14px; color:#888;">(optional)</span></h2>
+      <p style="color:#888; font-size:13px; margin-bottom:16px;">
+        Log the first event that triggered this incident.
+      </p>
+
+      <div class="field">
+        <label for="event_type">Event type</label>
+        <select id="event_type" name="event_type">
+          <option value="">— none —</option>
+          <option value="LOGIN_FAILURE">Login failure</option>
+          <option value="MALWARE_EXEC">Malware execution</option>
+          <option value="PORT_SCAN">Port scan</option>
+          <option value="SQL_INJECTION">SQL injection</option>
+          <option value="DATA_EXFIL">Data exfiltration</option>
+          <option value="C2_CONNECT">C2 connection</option>
+          <option value="FILE_ENCRYPT">File encryption</option>
+          <option value="PHISHING">Phishing</option>
+        </select>
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label for="source_ip">Source IP</label>
+          <input type="text" id="source_ip" name="source_ip"
+                 placeholder="e.g. 192.168.1.45">
+        </div>
+        <div class="field">
+          <label for="destination_ip">Destination IP</label>
+          <input type="text" id="destination_ip" name="destination_ip"
+                 placeholder="e.g. 10.0.0.1">
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="payload">Payload / notes</label>
+        <input type="text" id="payload" name="payload"
+               placeholder="e.g. 500 failed logins in 10 minutes">
+      </div>
+    </div>
+
+    <div style="display:flex; gap:10px;">
+      <button type="submit" class="btn btn-primary">Log incident</button>
+      <a href="{{ url_for('incidents') }}" class="btn">Cancel</a>
+    </div>
+
+  </form>
+</div>
+
+{% endblock %}

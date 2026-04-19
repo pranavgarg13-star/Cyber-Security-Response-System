@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>CyberIRS – {% block title %}{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+
+  <nav class="topbar">
+    <span class="brand">CyberIRS</span>
+    <a href="{{ url_for('dashboard') }}" 
+       class="{% if request.endpoint == 'dashboard' %}active{% endif %}">Dashboard</a>
+    <a href="{{ url_for('incidents') }}"
+       class="{% if request.endpoint == 'incidents' %}active{% endif %}">Incidents</a>
+    <a href="{{ url_for('alerts') }}"
+       class="{% if request.endpoint == 'alerts' %}active{% endif %}">Alerts</a>
+       <a href="{{ url_for('risk_report') }}"
+   class="{% if request.endpoint == 'risk_report' %}active{% endif %}">
+   
+   Risk report
+</a>
+<a href="{{ url_for('vulnerabilities') }}"
+   class="{% if request.endpoint in ['vulnerabilities', 'new_vulnerability'] %}active{% endif %}">
+   Vulnerabilities
+</a>
+  </nav>
+
+  <main class="page">
+    {% block content %}{% endblock %}
+  </main>
+
+</body>
+</html>

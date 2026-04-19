@@ -1,0 +1,170 @@
+{% extends 'base.html' %}
+{% block title %}Risk Report{% endblock %}
+
+{% block content %}
+
+<h1>Risk Report</h1>
+<p style="color:#888; font-size:14px; margin-bottom:28px;">
+  Correlated analysis across all incidents, events, threats and vulnerabilities.
+</p>
+
+
+<!-- ── OBJECTIVE 1: Event correlation ── -->
+<div class="card" style="margin-bottom:20px;">
+  <h2>Objective 1 — Event &amp; alert correlation per incident</h2>
+  <p class="obj-desc">
+    Shows how many raw events and alerts each incident generated.
+    High counts signal complex, multi-stage attacks.
+  </p>
+  <table>
+    <thead>
+      <tr>
+        <th>Incident</th>
+        <th>Severity</th>
+        <th>Status</th>
+        <th>Events</th>
+        <th>Alerts</th>
+        <th>Correlation score</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in correlated %}
+      <tr>
+        <td>
+          <a href="{{ url_for('incident_detail', id=row.incident_id) }}">
+            {{ row.title }}
+          </a>
+        </td>
+        <td><span class="badge badge-{{ row.severity | lower }}">{{ row.severity }}</span></td>
+        <td>{{ row.status }}</td>
+        <td>{{ row.event_count }}</td>
+        <td>{{ row.alert_count }}</td>
+        <td>
+          {% set score = row.event_count + (row.alert_count * 2) %}
+          <span class="badge {% if score >= 8 %}badge-critical{% elif score >= 5 %}badge-high{% elif score >= 2 %}badge-medium{% else %}badge-low{% endif %}">
+            {{ score }}
+          </span>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+
+<!-- ── OBJECTIVE 2: Attack patterns ── -->
+<div class="card" style="margin-bottom:20px;">
+  <h2>Objective 2 — Attack pattern identification</h2>
+  <p class="obj-desc">
+    Groups threats by attack type and vector to reveal recurring patterns
+    and which attack methods carry the highest average risk.
+  </p>
+  <table>
+    <thead>
+      <tr>
+        <th>Attack type</th>
+        <th>Vector</th>
+        <th>Occurrences</th>
+        <th>Incidents affected</th>
+        <th>Avg risk score</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in patterns %}
+      <tr>
+        <td><code>{{ row.attack_type }}</code></td>
+        <td>{{ row.attack_vector }}</td>
+        <td>{{ row.occurrences }}</td>
+        <td>{{ row.incidents_affected }}</td>
+        <td>
+          <span class="badge {% if row.avg_risk >= 8 %}badge-critical{% elif row.avg_risk >= 6 %}badge-high{% elif row.avg_risk >= 4 %}badge-medium{% else %}badge-low{% endif %}">
+            {{ row.avg_risk }}/10
+          </span>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+
+<!-- ── OBJECTIVE 3: Risk assessment ── -->
+<div class="card" style="margin-bottom:20px;">
+  <h2>Objective 3 — Risk assessment (unpatched vulnerabilities)</h2>
+  <p class="obj-desc">
+    Joins incidents → threats → vulnerabilities to surface active incidents
+    where the exploited CVE is still unpatched. These are your highest-priority risks.
+  </p>
+  {% if risk_assessment %}
+  <table>
+    <thead>
+      <tr>
+        <th>Incident</th>
+        <th>Severity</th>
+        <th>CVE</th>
+        <th>CVSS score</th>
+        <th>Affected system</th>
+        <th>Patch status</th>
+        <th>Attack type</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in risk_assessment %}
+      <tr>
+        <td>{{ row.title }}</td>
+        <td><span class="badge badge-{{ row.severity | lower }}">{{ row.severity }}</span></td>
+        <td><code>{{ row.cve_id }}</code></td>
+        <td>
+          <span class="badge {% if row.cvss_score >= 9 %}badge-critical{% elif row.cvss_score >= 7 %}badge-high{% elif row.cvss_score >= 4 %}badge-medium{% else %}badge-low{% endif %}">
+            {{ row.cvss_score }}
+          </span>
+        </td>
+        <td>{{ row.affected_system }}</td>
+        <td><span class="badge badge-critical">{{ row.patch_status }}</span></td>
+        <td>{{ row.attack_type }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p style="color:#4a7c2f; font-size:14px;">
+    No open incidents with unpatched vulnerabilities. Good posture!
+  </p>
+  {% endif %}
+</div>
+
+
+<!-- ── OBJECTIVE 4: Prioritized response tasks ── -->
+<div class="card">
+  <h2>Objective 4 — Prioritized incident response tasks</h2>
+  <p class="obj-desc">
+    Filters to open/in-progress incidents with pending mitigation actions,
+    ordered by incident severity then action priority. This is your to-do list.
+  </p>
+  <table>
+    <thead>
+      <tr>
+        <th>Incident</th>
+        <th>Severity</th>
+        <th>Action needed</th>
+        <th>Assigned to</th>
+        <th>Action priority</th>
+        <th>Events</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in priorities %}
+      <tr>
+        <td>{{ row.title }}</td>
+        <td><span class="badge badge-{{ row.severity | lower }}">{{ row.severity }}</span></td>
+        <td><code>{{ row.action_type }}</code></td>
+        <td>{{ row.assigned_to }}</td>
+        <td><span class="badge badge-{{ row.action_priority | lower }}">{{ row.action_priority }}</span></td>
+        <td>{{ row.event_count }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% endblock %}

@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+{% block title %}Vulnerabilities{% endblock %}
+
+{% block content %}
+
+<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+  <h1>Vulnerabilities</h1>
+  <a href="{{ url_for('new_vulnerability') }}" class="btn btn-primary">+ Add CVE</a>
+</div>
+<p style="color:#888; font-size:14px; margin-bottom:20px;">
+  Tracked CVEs and their patch status across your systems.
+</p>
+
+<!-- Filter buttons — each is just a link with a ?status= param -->
+<div style="display:flex; gap:8px; margin-bottom:20px;">
+  <a href="{{ url_for('vulnerabilities') }}"
+     class="filter-btn {% if status_filter == 'ALL' %}active{% endif %}">
+    All &nbsp;<span class="filter-count">{{ (counts.values() | sum) }}</span>
+  </a>
+  <a href="{{ url_for('vulnerabilities', status='UNPATCHED') }}"
+     class="filter-btn filter-danger {% if status_filter == 'UNPATCHED' %}active{% endif %}">
+    Unpatched &nbsp;<span class="filter-count">{{ counts.get('UNPATCHED', 0) }}</span>
+  </a>
+  <a href="{{ url_for('vulnerabilities', status='MITIGATED') }}"
+     class="filter-btn filter-warn {% if status_filter == 'MITIGATED' %}active{% endif %}">
+    Mitigated &nbsp;<span class="filter-count">{{ counts.get('MITIGATED', 0) }}</span>
+  </a>
+  <a href="{{ url_for('vulnerabilities', status='PATCHED') }}"
+     class="filter-btn filter-ok {% if status_filter == 'PATCHED' %}active{% endif %}">
+    Patched &nbsp;<span class="filter-count">{{ counts.get('PATCHED', 0) }}</span>
+  </a>
+</div>
+
+<!-- Vulnerability table -->
+<div class="card">
+  {% if vulns %}
+  <table>
+    <thead>
+      <tr>
+        <th>CVE ID</th>
+        <th>CVSS score</th>
+        <th>Affected system</th>
+        <th>Description</th>
+        <th>Patch status</th>
+        <th>Threats</th>
+        <th>Incidents</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for v in vulns %}
+      <tr>
+        <td><code>{{ v.cve_id or '—' }}</code></td>
+        <td>
+          <span class="badge
+            {% if v.cvss_score >= 9.0 %}badge-critical
+            {% elif v.cvss_score >= 7.0 %}badge-high
+            {% elif v.cvss_score >= 4.0 %}badge-medium
+            {% else %}badge-low{% endif %}">
+            {{ v.cvss_score }}
+          </span>
+        </td>
+        <td>{{ v.affected_system }}</td>
+        <td style="font-size:13px; color:#555;">{{ v.description }}</td>
+        <td>
+          <span class="badge
+            {% if v.patch_status == 'UNPATCHED' %}badge-critical
+            {% elif v.patch_status == 'MITIGATED' %}badge-high
+            {% else %}badge-low{% endif %}">
+            {{ v.patch_status }}
+          </span>
+        </td>
+        <td>{{ v.threat_count }}</td>
+        <td>{{ v.incidents_affected }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p style="color:#888; font-size:14px; padding:8px 0;">
+    No vulnerabilities found for this filter.
+  </p>
+  {% endif %}
+</div>
+
+{% endblock %}

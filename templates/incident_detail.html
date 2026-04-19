@@ -1,0 +1,128 @@
+{% extends 'base.html' %}
+{% block title %}{{ incident.title }}{% endblock %}
+
+{% block content %}
+
+
+  <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:24px;">
+  <div>
+    <a href="{{ url_for('incidents') }}" style="font-size:13px; color:#888;">← Back to incidents</a>
+    <h1 style="margin-top:6px;">{{ incident.title }}</h1>
+    <p style="color:#888; font-size:14px;">{{ incident.description }}</p>
+  </div>
+  <div style="text-align:right;">
+    <span class="badge badge-{{ incident.severity | lower }}">{{ incident.severity }}</span>
+    <br><br>
+    <span style="font-size:13px; color:#888;">{{ incident.status }}</span>
+    <br><br>
+
+    <!-- Delete button — wrapped in a form so it sends POST -->
+    <form method="POST" action="{{ url_for('delete_incident', id=incident.incident_id) }}"
+          onsubmit="return confirm('Delete this incident and all related events, alerts and actions?')">
+      <button type="submit" class="btn"
+              style="border-color:#fecaca; color:#991b1b; font-size:12px;">
+        Delete incident
+      </button>
+    </form>
+
+  </div>
+</div>
+  
+</div>
+
+<!-- Events timeline -->
+<div class="card" style="margin-bottom:16px;">
+  <h2>Events <span style="font-size:14px;font-weight:400;color:#888;">({{ events|length }})</span></h2>
+  <table>
+    <thead>
+      <tr><th>Time</th><th>Type</th><th>Source IP</th><th>Destination</th><th>Details</th></tr>
+    </thead>
+    <tbody>
+      {% for e in events %}
+      <tr>
+        <td style="font-size:12px;color:#888;">{{ e.timestamp }}</td>
+        <td><code>{{ e.event_type }}</code></td>
+        <td>{{ e.source_ip or '—' }}</td>
+        <td>{{ e.destination_ip or '—' }}</td>
+        <td style="font-size:13px;">{{ e.payload }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<!-- Alerts -->
+<div class="card" style="margin-bottom:16px;">
+  <h2>Alerts</h2>
+  <table>
+    <thead>
+      <tr><th>Type</th><th>Priority</th><th>Message</th><th>Triggered</th></tr>
+    </thead>
+    <tbody>
+      {% for a in alerts %}
+      <tr>
+        <td><code>{{ a.alert_type }}</code></td>
+        <td><span class="badge badge-{{ a.priority | lower }}">{{ a.priority }}</span></td>
+        <td>{{ a.message }}</td>
+        <td style="font-size:12px;color:#888;">{{ a.triggered_at }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<!-- Threats + linked CVEs -->
+<div class="card" style="margin-bottom:16px;">
+  <h2>Threats</h2>
+  <table>
+    <thead>
+      <tr><th>Attack type</th><th>Vector</th><th>Actor</th><th>Risk score</th><th>CVE</th><th>CVSS</th></tr>
+    </thead>
+    <tbody>
+      {% for t in threats %}
+      <tr>
+        <td>{{ t.attack_type }}</td>
+        <td>{{ t.attack_vector }}</td>
+        <td>{{ t.threat_actor }}</td>
+        <td>
+          <span class="badge {% if t.risk_score >= 8 %}badge-critical{% elif t.risk_score >= 6 %}badge-high{% else %}badge-medium{% endif %}">
+            {{ t.risk_score }}/10
+          </span>
+        </td>
+        <td>{{ t.cve_id or '—' }}</td>
+        <td>{{ t.cvss_score or '—' }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<!-- Mitigation actions (weak entity!) -->
+<div class="card">
+  <h2>Mitigation actions</h2>
+  <p style="font-size:12px;color:#888;margin-bottom:12px;">
+    PK = (action_id, incident_id) — this is the weak entity from your ER diagram
+  </p>
+  <table>
+    <thead>
+      <tr><th>Action</th><th>Description</th><th>Assigned to</th><th>Priority</th><th>Status</th></tr>
+    </thead>
+    <tbody>
+      {% for m in actions %}
+      <tr>
+        <td><code>{{ m.action_type }}</code></td>
+        <td>{{ m.description }}</td>
+        <td>{{ m.assigned_to }}</td>
+        <td><span class="badge badge-{{ m.priority | lower }}">{{ m.priority }}</span></td>
+        <td>
+          <span class="badge {% if m.status == 'DONE' %}badge-low{% elif m.status == 'IN_PROGRESS' %}badge-high{% else %}badge-medium{% endif %}">
+            {{ m.status }}
+          </span>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% endblock %}

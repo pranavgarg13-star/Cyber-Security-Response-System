@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<h1>Dashboard</h1>
+
+<!-- Stat cards — data comes from Flask's render_template() call -->
+<div class="stat-grid">
+  <div class="stat-card">
+    <div class="stat-label">Open incidents</div>
+    <div class="stat-value">{{ open_count }}</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Critical</div>
+    <div class="stat-value">{{ severity_counts.get('CRITICAL', 0) }}</div>
+  </div>
+</div>
+
+<!-- Attack patterns table — loop over a list Flask passed in -->
+<div class="card">
+  <h2>Top attack types</h2>
+  <table>
+    <thead>
+      <tr><th>Attack type</th><th>Count</th><th>Avg risk score</th></tr>
+    </thead>
+    <tbody>
+      {% for row in attack_patterns %}
+      <tr>
+        <td>{{ row.attack_type }}</td>
+        <td>{{ row.occurrences }}</td>
+        <td>{{ "%.1f"|format(row.avg_risk or 0) }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

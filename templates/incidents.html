@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% block title %}Incidents{% endblock %}
+
+{% block content %}
+<div style="display:flex; justify-content:space-between; align-items:center;">
+  <h1>Incidents</h1>
+  <a href="{{ url_for('new_incident') }}" class="btn">+ New incident</a>
+</div>
+
+<table>
+  <thead>
+    <tr><th>Title</th><th>Severity</th><th>Status</th><th>Events</th><th>Detected</th></tr>
+  </thead>
+  <tbody>
+    {% for inc in incidents %}
+    <tr>
+      <td>
+        <a href="{{ url_for('incident_detail', id=inc.incident_id) }}">
+          {{ inc.title }}
+        </a>
+      </td>
+      <td>
+        <span class="badge badge-{{ inc.severity | lower }}">
+          {{ inc.severity }}
+        </span>
+      </td>
+      <td>{{ inc.status }}</td>
+      <td>{{ inc.event_count }}</td>
+      <td>{{ inc.detected_at.strftime('%Y-%m-%d') }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}
